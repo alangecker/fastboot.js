@@ -310,7 +310,7 @@ export async function flashZip(
             "reboot",
             "device",
             FASTBOOTD_REBOOT_TIME,
-            device.reboot("fastboot", true, onReconnect)
+            tryReboot(device, "fastboot", onReconnect)
         );
 
         let superName = await device.getVariable("super-partition-name");
@@ -348,7 +348,7 @@ export async function flashZip(
             "reboot",
             "device",
             BOOTLOADER_REBOOT_TIME,
-            device.reboot("bootloader", true, onReconnect)
+            tryReboot(device, "bootloader", onReconnect)
         );
     }
 
