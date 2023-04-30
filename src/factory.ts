@@ -68,9 +68,9 @@ const FASTBOOTD_REBOOT_TIME = 16000; // ms
 const USERDATA_ERASE_TIME = 1000; // ms
 
 // Wrapper for Entry#getData() that unwraps ProgressEvent errors
-async function zipGetData(
+async function zipGetData<T>(
     entry: Entry,
-    writer: Writer,
+    writer: Writer<T>,
     options?: EntryGetDataOptions,
 ) {
     try {
@@ -96,11 +96,11 @@ async function flashEntryBlob(
 ) {
     common.logDebug(`Unpacking ${partition}`);
     onProgress("unpack", partition, 0.0);
-    let blob = await zipGetData(
+    let blob = await zipGetData<Blob>(
         entry,
-        new BlobWriter("application/octet-stream"),
+        new BlobWriter("application/octet-stream") as Writer<Blob>,
         {
-            onprogress: (bytes: number, len: number) => {
+            onprogress: async (bytes: number, len: number) => {
                 onProgress("unpack", partition, bytes / len);
             },
         }
@@ -276,9 +276,9 @@ export async function flashZip(
     let entry = entries.find((e) => e.filename.match(/image-.+\.zip$/));
     let imagesBlob = await zipGetData(
         entry!,
-        new BlobWriter("application/zip"),
+        new BlobWriter("application/zip") as Writer<Blob>,
         {
-            onprogress: (bytes: number, len: number) => {
+            onprogress: async (bytes: number, len: number) => {
                 onProgress("unpack", "images", bytes / len);
             },
         }
@@ -320,9 +320,9 @@ export async function flashZip(
 
         let superAction = wipe ? "wipe" : "flash";
         onProgress(superAction, "super", 0.0);
-        let superBlob = await zipGetData(
+        let superBlob = await zipGetData<Blob>(
             entry,
-            new BlobWriter("application/octet-stream")
+            new BlobWriter("application/octet-stream") as Writer<Blob>
         );
         await device.upload(
             superName,
